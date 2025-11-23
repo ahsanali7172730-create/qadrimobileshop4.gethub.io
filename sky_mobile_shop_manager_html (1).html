@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qadri Shop Manager</title>
+  <style>
+    /* (styles preserved from previous version, unchanged for brevity) */
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{margin:0;padding:0;min-height:100vh;background:radial-gradient(circle at top,#0f172a 0,#020617 45%,#000 100%);color:#e5e7eb;display:flex;align-items:stretch;justify-content:center}
+    .login-overlay{position:fixed;inset:0;background:radial-gradient(circle at top,rgba(15,23,42,0.96),rgba(0,0,0,0.98));display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .2s}
+    .login-card{width:100%;max-width:360px;padding:1.5rem 1.4rem;border-radius:1.1rem;background:linear-gradient(180deg,rgba(2,6,23,0.95),rgba(3,7,18,0.9));box-shadow:0 26px 60px rgba(0,0,0,1),0 0 0 1px rgba(55,65,81,0.95),0 14px 40px rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.45);perspective:1200px;transform-style:preserve-3d;will-change:transform;animation:floatCard 6s ease-in-out infinite}
+    .login-card .card-inner{transform-style:preserve-3d;transition:transform 220ms ease-out,box-shadow 220ms ease-out;padding:1rem;border-radius:1rem;background:linear-gradient(180deg,rgba(3,7,18,0.9),rgba(2,6,23,0.85));box-shadow:0 10px 30px rgba(2,6,23,.6),inset 0 1px 0 rgba(255,255,255,.02);backface-visibility:hidden}
+    @keyframes floatCard{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+    .login-title{margin:0 0 .25rem;font-size:1.3rem;text-align:center}.login-sub{font-size:.8rem;text-align:center;color:#9ca3af;margin-bottom:.75rem}
+    .login-card input{width:100%;margin-top:.5rem}.login-error{color:#fecaca;font-size:.8rem;margin-top:.5rem;min-height:1em;text-align:center}
+    .app{width:100%;max-width:1200px;margin:1.5rem;padding:1.25rem;border-radius:1.25rem;background:linear-gradient(145deg,#020617 0%,#020617 45%,#020617 60%,#030712 100%);box-shadow:0 25px 60px rgba(0,0,0,.85),0 0 0 1px rgba(148,163,184,.12),0 0 80px rgba(34,197,94,.05);backdrop-filter:blur(18px);border:1px solid rgba(148,163,184,.25)}
+    header{background:radial-gradient(circle at top left,#22c55e,#16a34a 35%,#0f766e 70%);color:white;padding:1rem 1.5rem;border-radius:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;box-shadow:0 18px 40px rgba(22,163,74,.8),0 0 0 1px rgba(22,163,74,.6);transform:translateY(0);transition:transform .2s ease,box-shadow .2s ease}
+    header:hover{transform:translateY(-2px);box-shadow:0 26px 60px rgba(22,163,74,.9),0 0 0 1px rgba(190,242,100,.9)}header h1{margin:0;font-size:1.7rem;letter-spacing:.04em}header small{opacity:.95;font-size:.9rem;display:block}.tagline{font-size:.9rem;text-align:right}
+    .nav-tabs{margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:.6rem}.nav-tab{border:none;padding:.5rem .9rem;border-radius:999px;background:radial-gradient(circle at top,#0b1120 0,#020617 80%);cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:.35rem;color:#e5e7eb;box-shadow:0 10px 18px rgba(15,23,42,.9),0 0 0 1px rgba(148,163,184,.35);transform:translateY(0);transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease}
+    .nav-tab:hover{transform:translateY(-2px);box-shadow:0 18px 28px rgba(15,23,42,.95),0 0 0 1px rgba(148,163,184,.7)}.nav-tab.active{background:radial-gradient(circle at top left,#22c55e 0,#16a34a 40%,#0f766e 100%);color:#f9fafb;box-shadow:0 18px 32px rgba(34,197,94,.85),0 0 0 1px rgba(190,242,100,.9)}
+    main{margin-top:1.25rem}section{display:none;background:radial-gradient(circle at top left,#020617 0,#020617 60%,#020617 100%);border-radius:1rem;padding:1rem;box-shadow:0 18px 40px rgba(0,0,0,.85),inset 0 0 0 1px rgba(30,64,175,.28);margin-bottom:1rem;transform:translateY(0);transition:transform .2s ease,box-shadow .2s ease}section.active{display:block}section:hover{transform:translateY(-2px);box-shadow:0 24px 55px rgba(15,23,42,1),inset 0 0 0 1px rgba(59,130,246,.4)}
+    h2{margin-top:0;font-size:1.25rem;display:flex;align-items:center;gap:.5rem;color:#e5e7eb}h2 span.icon{font-size:1.3rem}.flex-between{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+    form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:1rem;margin-top:.5rem}label{display:flex;flex-direction:column;font-size:.8rem;color:#9ca3af;gap:.15rem}
+    input,select,textarea{padding:.45rem .6rem;border-radius:.55rem;border:1px solid rgba(55,65,81,.9);font-size:.9rem;outline:none;background:radial-gradient(circle at top,#020617 0,#020617 80%);color:#e5e7eb;box-shadow:inset 0 1px 3px rgba(0,0,0,.85),0 0 0 1px rgba(15,23,42,.8);transition:box-shadow .18s ease,border-color .18s ease,background .18s ease}
+    input::placeholder,textarea::placeholder{color:#6b7280}input:focus,select:focus,textarea:focus{border-color:#22c55e;box-shadow:0 0 0 1px rgba(34,197,94,.9),0 0 25px rgba(34,197,94,.45),inset 0 1px 3px rgba(15,23,42,.9);background:radial-gradient(circle at top,#020617 0,#020617 80%)}textarea{min-height:60px;resize:vertical}
+    .btn-primary{padding:.55rem .95rem;border-radius:.7rem;border:none;background:radial-gradient(circle at top left,#22c55e,#16a34a 35%,#15803d 100%);color:white;font-size:.9rem;cursor:pointer;margin-top:auto;align-self:flex-end;box-shadow:0 16px 32px rgba(34,197,94,.9),0 0 0 1px rgba(190,242,100,.8);transform:translateY(0);transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}.btn-primary:hover{transform:translateY(-2px);filter:brightness(1.05);box-shadow:0 22px 40px rgba(34,197,94,1),0 0 0 1px rgba(250,250,250,.9)}
+    .btn-danger{padding:.4rem .7rem;border-radius:.6rem;border:none;background:radial-gradient(circle at top,#ef4444 0,#b91c1c 70%);color:white;font-size:.8rem;cursor:pointer;box-shadow:0 10px 22px rgba(239,68,68,.9),0 0 0 1px rgba(254,202,202,.9);transform:translateY(0);transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}.btn-danger:hover{transform:translateY(-2px);filter:brightness(1.03);box-shadow:0 16px 30px rgba(248,113,113,1),0 0 0 1px rgba(255,241,242,1)}
+    .btn-outline{padding:.4rem .7rem;border-radius:.6rem;border:1px solid rgba(148,163,184,.9);background:radial-gradient(circle at top,#020617 0,#020617 80%);cursor:pointer;font-size:.8rem;color:#e5e7eb;box-shadow:0 10px 20px rgba(15,23,42,.9);transform:translateY(0);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.btn-outline:hover{transform:translateY(-2px);border-color:#22c55e;box-shadow:0 16px 32px rgba(15,23,42,1),0 0 0 1px rgba(34,197,94,.7)}
+    .table-wrapper{overflow-x:auto;border-radius:.85rem;border:1px solid rgba(55,65,81,.9);box-shadow:0 18px 40px rgba(0,0,0,1),inset 0 0 0 1px rgba(15,23,42,.9);background:radial-gradient(circle at top,#020617 0,#020617 80%)}table{width:100%;border-collapse:collapse;font-size:.85rem;color:#e5e7eb}thead{background:radial-gradient(circle at top,#111827 0,#020617 80%)}th,td{padding:.45rem .6rem;border-bottom:1px solid rgba(31,41,55,.9);text-align:left;white-space:nowrap}tbody tr:nth-child(even){background:rgba(15,23,42,.9)}tbody tr:hover{background:rgba(22,101,52,.5)}
+    .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.9rem;margin-bottom:1rem}.card{background:radial-gradient(circle at top left,#020617 0,#020617 80%);border-radius:.9rem;padding:.75rem .9rem;border:1px solid rgba(31,41,55,.9);box-shadow:0 14px 32px rgba(0,0,0,1),inset 0 0 0 1px rgba(15,23,42,.9);transform:translateY(0);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.card:hover{transform:translateY(-3px);border-color:rgba(34,197,94,.8);box-shadow:0 22px 45px rgba(0,0,0,1),0 0 0 1px rgba(34,197,94,.7)}.card-title{font-size:.8rem;color:#9ca3af;margin-bottom:.2rem}.card-value{font-size:1.15rem;font-weight:600;color:#e5e7eb}.badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;border-radius:999px;padding:.15rem .55rem;background:radial-gradient(circle at top,#111827 0,#020617 80%);color:#e5e7eb;box-shadow:0 10px 22px rgba(15,23,42,1),0 0 0 1px rgba(55,65,81,.9)}.small{font-size:.75rem;color:#9ca3af}
+    @media(max-width:600px){body{align-items:flex-start}.app{margin:.5rem;padding:.75rem;border-radius:1rem}header{flex-direction:column;align-items:flex-start}.btn-primary{width:100%}form{grid-template-columns:1fr}.tagline{text-align:left}}
+    /* 3D Dashboard styles */
+    .dashboard-3d{perspective:1400px;margin:1rem 0 .5rem 0}.scene{width:100%;height:260px;position:relative;transform-style:preserve-3d;transition:transform 300ms ease;display:flex;align-items:center;justify-content:center;gap:1rem}.panel{width:220px;height:140px;border-radius:12px;background:linear-gradient(135deg,rgba(10,20,12,.95),rgba(3,7,18,.9));border:1px solid rgba(34,197,94,.35);box-shadow:0 18px 46px rgba(2,6,23,.9),inset 0 1px 0 rgba(255,255,255,.02);transform-style:preserve-3d;display:flex;flex-direction:column;padding:.8rem;justify-content:space-between;color:#e6ffed;transition:transform 220ms ease,box-shadow 220ms ease;backface-visibility:hidden}.panel .p-title{font-size:.85rem;color:#9ca3af}.panel .p-value{font-size:1.4rem;font-weight:700}.panel:hover{transform:translateZ(30px) rotateY(0deg) translateY(-6px);box-shadow:0 30px 60px rgba(2,6,23,.95)}.cube-wrap{width:220px;height:220px;display:flex;align-items:center;justify-content:center}.cube{width:150px;height:150px;position:relative;transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(20deg);transition:transform 600ms cubic-bezier(.2,.9,.3,1)}.cube .face{position:absolute;width:150px;height:150px;border-radius:10px;background:linear-gradient(180deg,#06361b,#052419);border:1px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;color:#d1fae5;font-weight:700;text-align:center;white-space:pre-line}
+    .cube .front{transform:translateZ(75px)}.cube .back{transform:rotateY(180deg) translateZ(75px)}.cube .right{transform:rotateY(90deg) translateZ(75px)}.cube .left{transform:rotateY(-90deg) translateZ(75px)}.cube .top{transform:rotateX(90deg) translateZ(75px)}.cube .bottom{transform:rotateX(-90deg) translateZ(75px)}
+  </style>
+</head>
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card" id="loginCard">
+      <div class="card-inner">
+        <h2 class="login-title">Qadri Shop Manager Login</h2>
+        <form id="loginForm">
+          <input type="password" id="loginPin" placeholder="PIN" />
+          <button type="submit" class="btn-primary" style="width:100%;margin-top:0.75rem;">Enter Panel</button>
+        </form>
+        <div id="loginError" class="login-error"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header>
+      <div>
+        <h1>Qadri Shop Manager</h1>
+        <small><small style="font-weight:bold; font-size:1rem;">Muzmail</small></small>
+      </div>
+      <div class="tagline"></div>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-target="dashboard"><span class="icon">🏠</span>Dashboard</button>
+      <button class="nav-tab" data-target="customers"><span class="icon">👤</span>Customers</button>
+      <button class="nav-tab" data-target="products"><span class="icon">📱</span>Mobiles / Stock</button>
+      <button class="nav-tab" data-target="sales"><span class="icon">💸</span>Sales</button>
+      <button class="nav-tab" data-target="data"><span class="icon">💾</span>Data Sales</button>
+      <button class="nav-tab" data-target="expenses"><span class="icon">📒</span>Expenses</button>
+      <button class="nav-tab" data-target="tasks"><span class="icon">✅</span>Tasks</button>
+      <button class="nav-tab" data-target="settings"><span class="icon">⚙️</span>Settings / Backup</button>
+    </nav>
+
+    <main>
+      <!-- Dashboard -->
+      <section id="dashboard" class="active">
+        <h2><span class="icon">🏠</span>Dashboard</h2>
+
+        <!-- 3D Dashboard LOCK + Scene -->
+        <div class="dashboard-3d">
+          <div class="scene" id="dashboardScene">
+
+            <!-- Left: 3D KPI Cube (interactive) -->
+            <div class="cube-wrap">
+              <div class="cube" id="kpiCube" aria-hidden="true">
+                <div class="face front" id="cubeFront">Sales</div>
+                <div class="face back" id="cubeBack">Profit</div>
+                <div class="face right" id="cubeRight">Customers</div>
+                <div class="face left" id="cubeLeft">Stock</div>
+                <div class="face top" id="cubeTop">Data</div>
+                <div class="face bottom" id="cubeBottom">Exp</div>
+              </div>
+            </div>
+
+            <!-- Center: 3D Lock -->
+            <div class="cube-wrap" style="width:260px;">
+              <div class="cube lock-cube" id="lockCube" style="width:180px;height:180px;">
+                <div class="face front">🔒</div>
+                <div class="face back">Secure</div>
+                <div class="face right">Live</div>
+                <div class="face left">Offline</div>
+                <div class="face top">v1.0</div>
+                <div class="face bottom">Qadri</div>
+              </div>
+            </div>
+
+            <!-- Right: Panels -->
+            <div style="display:flex;gap:.9rem;flex-direction:column;align-items:flex-start;">
+              <div class="panel" id="panelToday">
+                <div class="p-title">Aaj ki Sales</div>
+                <div class="p-value" id="panelTodayVal">0</div>
+                <div class="small">Bills: <span id="panelTodayCount">0</span></div>
+              </div>
+
+              <div class="panel" id="panelTotal">
+                <div class="p-title">Kul Sales</div>
+                <div class="p-value" id="panelTotalVal">0</div>
+                <div class="small">Bills: <span id="panelTotalCount">0</span></div>
+              </div>
+
+              <div class="panel" id="panelData">
+                <div class="p-title">Data Sales</div>
+                <div class="p-value" id="panelDataVal">0</div>
+                <div class="small">Items: <span id="panelDataCount">0</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick action bar -->
+        <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap;align-items:center;">
+          <button class="btn-primary" id="quickAddSale">+ Quick Sale</button>
+          <button class="btn-outline" id="quickAddData">+ Quick Data Sale</button>
+          <button class="btn-outline" id="quickAddProduct">+ Add Product</button>
+          <button class="btn-outline" id="quickExport">Export Backup</button>
+          <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center;">
+            <input id="dashSearch" placeholder="Search customers / products" style="padding:.45rem .6rem;border-radius:.55rem;background:transparent;border:1px solid rgba(55,65,81,.9);color:#e5e7eb;" />
+            <button class="btn-outline" id="btnFilter">Filters</button>
+          </div>
+        </div>
+
+        <!-- Expanded KPI cards -->
+        <div class="summary-cards" style="margin-top:1rem;">
+          <div class="card">
+            <div class="card-title">Total Customers</div>
+            <div class="card-value" id="totalCustomers">0</div>
+            <div class="small">Registered customers</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Stock Value (PKR)</div>
+            <div class="card-value" id="stockValue">0</div>
+            <div class="small">Estimated purchase value</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Low Stock Items</div>
+            <div class="card-value" id="lowStockCount">0</div>
+            <div class="small">Qty &lt; 5</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Cash in Hand</div>
+            <div class="card-value" id="cashInHand">0</div>
+            <div class="small">Cash sales total</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Today's Expenses</div>
+            <div class="card-value" id="todayExpenses">0</div>
+            <div class="small">Today's kharche</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Approx Profit</div>
+            <div class="card-value" id="approxProfitBig">0</div>
+            <div class="small">Sales - Expenses</div>
+          </div>
+        </div>
+
+        <!-- Charts & lists -->
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:.9rem;margin-top:1rem;">
+          <div class="card">
+            <div class="card-title">Sales (last 30 days)</div>
+            <canvas id="salesChart" width="800" height="260" style="width:100%;height:260px;display:block;background:transparent;border-radius:6px;"></canvas>
+            <div style="margin-top:.6rem;display:flex;gap:.6rem;flex-wrap:wrap;">
+              <div class="small">Avg Sale: <span id="avgSale">0</span></div>
+              <div class="small">Best Day: <span id="bestDay">-</span></div>
+              <div class="small">Most Sold: <span id="mostSold">-</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:.9rem;">
+            <div class="card">
+              <div class="card-title">Top selling items</div>
+              <div class="small">By quantity</div>
+              <div style="margin-top:.5rem;" id="topItemsList">No data</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Recent Activity</div>
+              <div id="recentActivity" class="small">No activity</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Today's History</div>
+              <div class="small">Recent records from today</div>
+              <div id="todayHistoryList" style="margin-top:.5rem;">No history for today</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Notifications</div>
+              <div id="notificationsList" class="small">No notifications</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest sales table short -->
+        <div class="table-wrapper" style="margin-top:.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Amount</th>
+                <th>Pay Type</th>
+              </tr>
+            </thead>
+            <tbody id="salesTableBodyShort"></tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- Customers -->
+      <section id="customers">
+        <div class="flex-between">
+          <h2><span class="icon">👤</span>Customers</h2>
+          <span class="badge"><span>👥</span><span id="customersCount">0</span> total</span>
+        </div>
+        <form id="customerForm">
+          <label>Name<input type="text" id="custName" required/></label>
+          <label>Mobile No<input type="text" id="custPhone"/></label>
+          <label>Address / Area<input type="text" id="custAddress"/></label>
+          <label>Notes<textarea id="custNotes"></textarea></label>
+          <button type="submit" class="btn-primary">+ Add Customer</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Address</th><th>Notes</th><th>Action</th></tr></thead><tbody id="customersTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Products -->
+      <section id="products">
+        <div class="flex-between"><h2><span class="icon">📱</span>Mobiles / Stock</h2><span class="badge"><span>📦</span><span id="productsCount">0</span> items</span></div>
+        <form id="productForm">
+          <label>Model / Item Name<input type="text" id="prodName" placeholder="ex: Infinix Smart 8 / Handsfree" required/></label>
+          <label>Brand<input type="text" id="prodBrand" placeholder="ex: Infinix / Audionic"/></label>
+          <label>Category / Accessory Type<select id="prodCategory"><option value="mobile">Mobile</option><option value="handsfree">Handsfree</option><option value="charger">Charger</option><option value="cable">Data Cable</option><option value="cover">Back Cover</option><option value="glass">Glass Protector</option><option value="battery">Battery</option><option value="bluetooth">Bluetooth / Earbuds</option><option value="card">Memory Card</option><option value="speaker">Speaker</option><option value="powerbank">Power Bank</option><option value="other">Other Accessory / Part</option></select></label>
+          <label>IMEI / Serial<input type="text" id="prodImei"/></label>
+          <label>Purchase Price<input type="number" id="prodBuy" min="0" step="1"/></label>
+          <label>Sale Price<input type="number" id="prodSell" min="0" step="1"/></label>
+          <label>Qty in Stock<input type="number" id="prodQty" min="0" step="1" value="1"/></label>
+          <label>Notes<textarea id="prodNotes" placeholder="Color, condition, packing, etc."></textarea></label>
+          <button type="submit" class="btn-primary">+ Add / Update Item</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Model</th><th>Brand</th><th>Category</th><th>IMEI</th><th>Buy</th><th>Sell</th><th>Qty</th><th>Notes</th><th>Action</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Sales -->
+      <section id="sales">
+        <div class="flex-between"><h2><span class="icon">💸</span>Sales (Mobile / Repair)</h2><span class="badge"><span>🧾</span><span id="salesCount">0</span> bills</span></div>
+        <form id="saleForm">
+          <label>Date<input type="date" id="saleDate" required/></label>
+          <label>Customer<select id="saleCustomer"><option value="">-- Select / Walk-in --</option></select></label>
+          <label>Item<select id="saleProduct"><option value="">-- Select item --</option></select></label>
+          <label>Qty<input type="number" id="saleQty" min="1" step="1" value="1"/></label>
+          <label>Price (per item)<input type="number" id="salePrice" min="0" step="1" required/></label>
+          <label>Payment Type<select id="salePayment"><option value="cash">Cash</option><option value="udhaar">Udhaar</option><option value="online">Online</option></select></label>
+          <label>Sale Type<select id="saleType"><option value="mobile">Mobile / Accessories</option><option value="repair">Repair</option><option value="other">Other</option></select></label>
+          <label>Notes<textarea id="saleNotes"></textarea></label>
+          <button type="submit" class="btn-primary">+ Add Sale</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Date</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Pay Type</th><th>Type</th><th>Notes</th><th>Action</th></tr></thead><tbody id="salesTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Data Sales -->
+      <section id="data">
+        <div class="flex-between"><h2><span class="icon">💾</span>Data Sales (Drama / Film / Song / Cartoon)</h2><span class="badge"><span>💾</span><span id="dataSalesCount">0</span> bills</span></div>
+        <form id="dataSaleForm">
+          <label>Date<input type="date" id="dataSaleDate" required/></label>
+          <label>Customer<select id="dataSaleCustomer"><option value="">-- Select / Walk-in --</option></select></label>
+          <label>Data Detail<input type="text" id="dataSaleTitle" placeholder="ex: 2 Films + 3 Dramas / Full USB 64GB" required/></label>
+          <label>Amount (Total)<input type="number" id="dataSaleAmount" min="0" step="1" required/></label>
+          <label>Payment Type<select id="dataSalePayment"><option value="cash">Cash</option><option value="udhaar">Udhaar</option><option value="online">Online</option></select></label>
+          <label>Notes<textarea id="dataSaleNotes" placeholder="Folder name, USB size, extra detail"></textarea></label>
+          <button type="submit" class="btn-primary">+ Add Data Sale</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Date</th><th>Customer</th><th>Detail</th><th>Amount</th><th>Pay Type</th><th>Notes</th><th>Action</th></tr></thead><tbody id="dataSalesTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Expenses -->
+      <section id="expenses">
+        <div class="flex-between"><h2><span class="icon">📒</span>Expenses (Kharche)</h2><span class="badge"><span>💵</span><span id="expensesCount">0</span> items</span></div>
+        <form id="expenseForm">
+          <label>Date<input type="date" id="expDate" required/></label>
+          <label>Category (Rent, Bill, etc)<input type="text" id="expCategory" required/></label>
+          <label>Amount<input type="number" id="expAmount" min="0" step="1" required/></label>
+          <label>Notes<textarea id="expNotes"></textarea></label>
+          <button type="submit" class="btn-primary">+ Add Expense</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Date</th><th>Category</th><th>Amount</th><th>Notes</th><th>Action</th></tr></thead><tbody id="expensesTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Tasks -->
+      <section id="tasks">
+        <div class="flex-between"><h2><span class="icon">✅</span>Tasks / Reminders</h2><span class="badge"><span>⏰</span><span id="tasksCount">0</span> tasks</span></div>
+        <p class="small">Yahan par jo kaam yaاد rakhنا ہو ... (reminder tab popup karega jab page open ho)</p>
+        <form id="taskForm">
+          <label>Task Title<input type="text" id="taskTitle" required/></label>
+          <label>Date<input type="date" id="taskDate" required/></label>
+          <label>Time<input type="time" id="taskTime"/></label>
+          <label>Notes<textarea id="taskNotes"></textarea></label>
+          <button type="submit" class="btn-primary">+ Add Task</button>
+        </form>
+        <div class="table-wrapper"><table><thead><tr><th>#</th><th>Title</th><th>Date</th><th>Time</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead><tbody id="tasksTableBody"></tbody></table></div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings">
+        <h2><span class="icon">⚙️</span>Settings / Backup</h2>
+        <div class="card" style="margin-bottom:.75rem;"><div class="card-title">Login PIN (Qadri Shop Manager)</div>
+          <form id="pinForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;margin-top:.5rem;">
+            <label>Current PIN<input type="password" id="pinCurrent" placeholder="1122"/></label>
+            <label>New PIN<input type="password" id="pinNew" placeholder="New PIN"/></label>
+            <button type="submit" class="btn-primary" style="align-self:flex-end;">Update PIN</button>
+          </form>
+          <p class="small">Default PIN: <strong>1122</strong>.</p>
+        </div>
+        <div class="card" style="margin-bottom:.75rem;"><div class="card-title">Local Storage Info</div><p class="small">Ye software sirf is browser me, is computer par kaam karega. Sara data aapke browser ki <strong>localStorage</strong> me save hota hai.</p></div>
+        <div class="flex-between"><div><h3 style="margin:0 0 .25rem;font-size:1rem;">Backup (Export JSON)</h3><p class="small">Niche button se JSON file download ho jayegi.</p></div><button id="btnExport" class="btn-outline">⬇️ Export Data</button></div>
+        <hr style="margin:.75rem 0;border:none;border-top:1px solid rgba(55,65,81,.9);"/>
+        <div class="flex-between"><div><h3 style="margin:0 0 .25rem;font-size:1rem;">Restore (Import JSON)</h3><p class="small">Pehle se saved backup file yahan se wapas load kar sakte hain.</p></div><div><input type="file" id="importFile" accept="application/json"/><button id="btnImport" class="btn-outline">⬆️ Import</button></div></div>
+        <hr style="margin:.75rem 0;border:none;border-top:1px solid rgba(55,65,81,.9);"/>
+        <div class="flex-between"><div><h3 style="margin:0 0 .25rem;font-size:1rem;color:#fecaca;">Danger Zone</h3><p class="small">Yahan se pura data clear ho jayega. Sirf tab use karein jab backup le liya ho.</p></div><button id="btnClearAll" class="btn-danger">🗑 Clear ALL Data</button></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // --- Data & storage keys ---
+    const STORAGE_KEY = 'qadriShopManagerData_v1';
+    const LOGIN_KEY = 'qadriShopManagerPin_v1';
+
+    let db = { customers: [], products: [], sales: [], expenses: [], tasks: [] };
+    window._lastDashboardComputed = {};
+
+    function getSavedPin(){ const p = localStorage.getItem(LOGIN_KEY); if (!p || !p.length) return '1122'; return p; }
+
+    function loadDB(){ try{ const saved = localStorage.getItem(STORAGE_KEY); if (saved){ const parsed = JSON.parse(saved); if (parsed && typeof parsed === 'object'){ db = Object.assign(db, parsed); } } }catch(e){console.error('Error loading DB',e);} }
+    function saveDB(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); refreshUI(); }catch(e){ alert('Error saving data (storage full?)'); console.error(e); } }
+    function generateId(prefix){ return prefix+'_'+Date.now()+'_'+Math.floor(Math.random()*100000); }
+    function formatMoney(v){ if (v === null || v === undefined || isNaN(Number(v))) return '0'; return Number(v).toLocaleString('en-PK',{style:'currency',currency:'PKR'}); }
+    function todayISO(){ const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+
+    // --- Safe DOM set helper ---
+    function setText(id, txt){ const el = document.getElementById(id); if (el) el.textContent = txt; }
+
+    // --- Refresh functions ---
+    function refreshCustomers(){ const body = document.getElementById('customersTableBody'); if (!body) return; body.innerHTML=''; db.customers.forEach((c,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${c.name||''}</td><td>${c.phone||''}</td><td>${c.address||''}</td><td>${c.notes||''}</td><td><button class="btn-danger" data-del-type="customer" data-id="${c.id}">Delete</button></td>`; body.appendChild(tr); }); setText('customersCount', db.customers.length); // populate selects
+      const sel1 = document.getElementById('saleCustomer'); const sel2 = document.getElementById('dataSaleCustomer'); if (sel1 && sel2){ const cur1=sel1.value; const cur2=sel2.value; sel1.innerHTML='<option value="">-- Select / Walk-in --</option>'; sel2.innerHTML=sel1.innerHTML; db.customers.forEach(c=>{ const o1=document.createElement('option'); o1.value=c.id; o1.textContent=c.name; sel1.appendChild(o1); const o2=document.createElement('option'); o2.value=c.id; o2.textContent=c.name; sel2.appendChild(o2); }); if (cur1) sel1.value=cur1; if (cur2) sel2.value=cur2; }
+    }
+
+    function categoryLabel(cat){ if(!cat) return ''; const map={mobile:'Mobile',handsfree:'Handsfree',charger:'Charger',cable:'Data Cable',cover:'Back Cover',glass:'Glass Protector',battery:'Battery',bluetooth:'Bluetooth / Earbuds',card:'Memory Card',speaker:'Speaker',powerbank:'Power Bank',other:'Accessory / Part'}; return map[cat]||cat }
+
+    function refreshProducts(){ const body=document.getElementById('productsTableBody'); if(!body) return; body.innerHTML=''; db.products.forEach((p,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${p.name||''}</td><td>${p.brand||''}</td><td>${categoryLabel(p.category)}</td><td>${p.imei||''}</td><td>${formatMoney(p.buyPrice)}</td><td>${formatMoney(p.sellPrice)}</td><td>${p.qty||0}</td><td>${p.notes||''}</td><td><button class="btn-danger" data-del-type="product" data-id="${p.id}">Delete</button></td>`; body.appendChild(tr); }); setText('productsCount', db.products.length);
+      const sel = document.getElementById('saleProduct'); if(sel){ const cur=sel.value; sel.innerHTML='<option value="">-- Select item --</option>'; db.products.forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=`${categoryLabel(p.category)?'['+categoryLabel(p.category)+'] ':''}${p.name}${p.brand?` (${p.brand})`:''}`; sel.appendChild(o); }); if(cur) sel.value=cur; }
+    }
+
+    function refreshSales(){ const body=document.getElementById('salesTableBody'); if(!body) return; body.innerHTML=''; const nonData = db.sales.filter(s=>s.type!=='data'); nonData.forEach((s,i)=>{ const cust = db.customers.find(c=>c.id===s.customerId); const prod = db.products.find(p=>p.id===s.productId); const total=(s.price||0)*(s.qty||1); const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${s.date||''}</td><td>${cust?cust.name:(s.customerName||'')}</td><td>${prod?prod.name:(s.productName||'')}</td><td>${s.qty||0}</td><td>${formatMoney(total)}</td><td>${s.paymentType||''}</td><td>${s.type||''}</td><td>${s.notes||''}</td><td><button class="btn-danger" data-del-type="sale" data-id="${s.id}">Delete</button></td>`; body.appendChild(tr); }); setText('salesCount', db.sales.filter(s=>s.type!=='data').length); }
+
+    function refreshDataSales(){ const body=document.getElementById('dataSalesTableBody'); if(!body) return; body.innerHTML=''; const dataSales=db.sales.filter(s=>s.type==='data'); dataSales.forEach((s,i)=>{ const cust=db.customers.find(c=>c.id===s.customerId); const total=(s.price||0)*(s.qty||1); const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${s.date||''}</td><td>${cust?cust.name:(s.customerName||'')}</td><td>${s.productName||'Data Sale'}</td><td>${formatMoney(total)}</td><td>${s.paymentType||''}</td><td>${s.notes||''}</td><td><button class="btn-danger" data-del-type="sale" data-id="${s.id}">Delete</button></td>`; body.appendChild(tr); }); setText('dataSalesCount', db.sales.filter(s=>s.type==='data').length); }
+
+    function refreshExpenses(){ const body=document.getElementById('expensesTableBody'); if(!body) return; body.innerHTML=''; db.expenses.forEach((e,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${e.date||''}</td><td>${e.category||''}</td><td>${formatMoney(e.amount)}</td><td>${e.notes||''}</td><td><button class="btn-danger" data-del-type="expense" data-id="${e.id}">Delete</button></td>`; body.appendChild(tr); }); setText('expensesCount', db.expenses.length); }
+
+    function refreshTasks(){ const body=document.getElementById('tasksTableBody'); if(!body) return; body.innerHTML=''; db.tasks.forEach((t,i)=>{ const status = t.done? 'Done' : (isTaskOverdue(t)?'Overdue':'Pending'); const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${t.title||''}</td><td>${t.date||''}</td><td>${t.time||''}</td><td>${status}</td><td>${t.notes||''}</td><td>${t.done? '': `<button class="btn-outline" data-done-id="${t.id}">Mark Done</button>`}<button class="btn-danger" data-del-type="task" data-id="${t.id}">Delete</button></td>`; body.appendChild(tr); }); setText('tasksCount', db.tasks.length); }
+
+    // --- Safe dashboard compute & update ---
+    function refreshDashboard(){ const today = todayISO(); let todayAmount=0, todayCount=0, totalSales=0, dataSalesTotal=0, dataSalesCount=0; const salesByDay = {}; for(let i=0;i<30;i++){ const d=new Date(); d.setDate(d.getDate()-i); salesByDay[d.toISOString().slice(0,10)]=0; }
+      db.sales.forEach(s=>{ const total=(s.price||0)*(s.qty||1); totalSales += total; if(s.date===today){ todayAmount += total; todayCount++; } if(s.type==='data'){ dataSalesTotal += total; dataSalesCount++; } if(s.date && salesByDay.hasOwnProperty(s.date)) salesByDay[s.date] += total; });
+      let totalExp=0; let todayExp=0; db.expenses.forEach(e=>{ totalExp += (e.amount||0); if(e.date===today) todayExp += (e.amount||0); });
+      const totalCustomers = db.customers.length; let stockValue=0, lowStock=0; db.products.forEach(p=>{ stockValue += (Number(p.buyPrice)||0)*(Number(p.qty)||0); if((Number(p.qty)||0) < 5) lowStock++; }); let cashInHand=0; db.sales.forEach(s=>{ if((s.paymentType||'').toLowerCase()==='cash') cashInHand += (s.price||0)*(s.qty||1); });
+      // store computed
+      window._lastDashboardComputed = { todayAmount, todayCount, totalSales, dataSalesTotal, dataSalesCount, totalExp, todayExp, totalCustomers, stockValue, lowStock, cashInHand };
+      // update visible elements safely
+      setText('panelTodayVal', formatMoney(todayAmount)); setText('panelTodayCount', `${todayCount} bills`);
+      setText('panelTotalVal', formatMoney(totalSales)); setText('panelTotalCount', `${db.sales.length} bills`);
+      setText('panelDataVal', formatMoney(dataSalesTotal)); setText('panelDataCount', `${dataSalesCount} bills`);
+      setText('panelExpVal', formatMoney(totalExp)); setText('panelExpCount', `${db.expenses.length} items`);
+      setText('totalCustomers', totalCustomers); setText('stockValue', formatMoney(stockValue)); setText('lowStockCount', lowStock); setText('cashInHand', formatMoney(cashInHand)); setText('todayExpenses', formatMoney(todayExp)); setText('approxProfitBig', formatMoney(totalSales - totalExp));
+      // update recent sales short table
+      const sbody = document.getElementById('salesTableBodyShort'); if (sbody){ sbody.innerHTML=''; const recent = [...db.sales].sort((a,b)=> (b.createdAt||0)-(a.createdAt||0)).slice(0,8); recent.forEach((s,i)=>{ const cust = db.customers.find(c=>c.id===s.customerId); const prod = db.products.find(p=>p.id===s.productId); const tr=document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${s.date||''}</td><td>${cust?cust.name:(s.customerName||'Walk-in')}</td><td>${prod?prod.name:(s.productName||'Data')}</td><td>${s.qty||1}</td><td>${formatMoney((s.price||0)*(s.qty||1))}</td><td>${s.paymentType||''}</td>`; sbody.appendChild(tr); }); }
+
+      // update today's history preview on dashboard
+      renderTodayHistory();
+    }
+
+    function refreshUI(){ refreshCustomers(); refreshProducts(); refreshSales(); refreshDataSales(); refreshExpenses(); refreshTasks(); refreshDashboard(); }
+
+    function isTaskOverdue(t){ if(!t||!t.date) return false; const [y,m,d] = t.date.split('-').map(Number); const [hh,mm]= (t.time||'00:00').split(':').map(Number); const taskDate=new Date(y,(m||1)-1,d||1,hh||0,mm||0); return Date.now()>taskDate.getTime(); }
+
+    function checkDueTasks(){ const now=Date.now(); let due=[]; db.tasks.forEach(t=>{ if(t.done||t.alerted) return; if(!t.date) return; const [y,m,d]=t.date.split('-').map(Number); const [hh,mm]=(t.time||'00:00').split(':').map(Number); const taskDate=new Date(y,(m||1)-1,d||1,hh||0,mm||0); if(now>=taskDate.getTime()){ due.push(t.title||'Task'); t.alerted=true; } }); if(due.length){ alert('Reminder:\n'+due.map((x,i)=>`${i+1}. ${x}`).join('\n')); saveDB(); } }
+
+    // --- DOM ready setup ---
+    document.addEventListener('DOMContentLoaded', ()=>{
+      loadDB(); refreshUI();
+      // set dates
+      const today = todayISO(); ['saleDate','expDate','taskDate','dataSaleDate'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=today; });
+      // nav tabs
+      document.querySelectorAll('.nav-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const target=btn.getAttribute('data-target'); document.querySelectorAll('main section').forEach(sec=>sec.classList.toggle('active', sec.id===target)); }); });
+
+      // forms
+      const customerForm=document.getElementById('customerForm'); if(customerForm) customerForm.addEventListener('submit', e=>{ e.preventDefault(); const name=document.getElementById('custName').value.trim(); if(!name) return alert('Name required'); const cust={ id:generateId('cust'), name, phone:document.getElementById('custPhone').value.trim(), address:document.getElementById('custAddress').value.trim(), notes:document.getElementById('custNotes').value.trim() }; db.customers.push(cust); customerForm.reset(); saveDB(); });
+
+      const productForm=document.getElementById('productForm'); if(productForm) productForm.addEventListener('submit', e=>{ e.preventDefault(); const name=document.getElementById('prodName').value.trim(); if(!name) return alert('Model / Item name required'); const prod={ id:generateId('prod'), name, brand:document.getElementById('prodBrand').value.trim(), category:document.getElementById('prodCategory').value, imei:document.getElementById('prodImei').value.trim(), buyPrice:Number(document.getElementById('prodBuy').value)||0, sellPrice:Number(document.getElementById('prodSell').value)||0, qty:Number(document.getElementById('prodQty').value)||0, notes:document.getElementById('prodNotes').value.trim() }; db.products.push(prod); productForm.reset(); saveDB(); });
+
+      const saleForm=document.getElementById('saleForm'); if(saleForm) saleForm.addEventListener('submit', e=>{ e.preventDefault(); const date=document.getElementById('saleDate').value; if(!date) return alert('Date required'); const qty=Number(document.getElementById('saleQty').value)||1; const price=Number(document.getElementById('salePrice').value)||0; if(!price) return alert('Price required'); const custId=document.getElementById('saleCustomer').value||null; const prodId=document.getElementById('saleProduct').value||null; const saleType=document.getElementById('saleType').value||'mobile'; const sale={ id:generateId('sale'), date, qty, price, paymentType:document.getElementById('salePayment').value, type:saleType, notes:document.getElementById('saleNotes').value.trim(), customerId:custId, productId:prodId, customerName: custId? '': 'Walk-in', productName: prodId? '': 'Custom item', createdAt:Date.now() }; if(prodId){ const prod=db.products.find(p=>p.id===prodId); if(prod){ prod.qty = Math.max(0, (prod.qty||0)-qty); } } db.sales.push(sale); document.getElementById('saleNotes').value=''; saveDB(); });
+
+      const dataSaleForm=document.getElementById('dataSaleForm'); if(dataSaleForm) dataSaleForm.addEventListener('submit', e=>{ e.preventDefault(); const date=document.getElementById('dataSaleDate').value; const title=document.getElementById('dataSaleTitle').value.trim(); const amount=Number(document.getElementById('dataSaleAmount').value)||0; if(!date||!title||!amount) return alert('Date, detail aur amount zaroori hain'); const custId=document.getElementById('dataSaleCustomer').value||null; const sale={ id:generateId('sale'), date, qty:1, price:amount, paymentType:document.getElementById('dataSalePayment').value, type:'data', notes:document.getElementById('dataSaleNotes').value.trim(), customerId:custId, productId:null, customerName:custId? '': 'Walk-in', productName:title, createdAt:Date.now() }; db.sales.push(sale); document.getElementById('dataSaleNotes').value=''; document.getElementById('dataSaleTitle').value=''; document.getElementById('dataSaleAmount').value=''; saveDB(); });
+
+      const expenseForm=document.getElementById('expenseForm'); if(expenseForm) expenseForm.addEventListener('submit', e=>{ e.preventDefault(); const date=document.getElementById('expDate').value; const cat=document.getElementById('expCategory').value.trim(); const amount=Number(document.getElementById('expAmount').value)||0; if(!date||!cat||!amount) return alert('Date, category, amount required'); const exp={ id:generateId('exp'), date, category:cat, amount, notes:document.getElementById('expNotes').value.trim() }; db.expenses.push(exp); document.getElementById('expNotes').value=''; saveDB(); });
+
+      const taskForm=document.getElementById('taskForm'); if(taskForm) taskForm.addEventListener('submit', e=>{ e.preventDefault(); const title=document.getElementById('taskTitle').value.trim(); const date=document.getElementById('taskDate').value; const time=document.getElementById('taskTime').value; if(!title||!date) return alert('Task title aur date zaroori hai'); const task={ id:generateId('task'), title, date, time, notes:document.getElementById('taskNotes').value.trim(), done:false, alerted:false, createdAt:Date.now() }; db.tasks.push(task); document.getElementById('taskNotes').value=''; document.getElementById('taskTitle').value=''; document.getElementById('taskTime').value=''; saveDB(); });
+
+      // global click handler for delete / mark done
+      document.body.addEventListener('click', e=>{ const btn=e.target.closest('button'); if(!btn) return; const doneId = btn.getAttribute('data-done-id'); if(doneId){ const t = db.tasks.find(x=>x.id===doneId); if(t){ t.done=true; t.alerted=true; saveDB(); } return; } const type = btn.getAttribute('data-del-type'); const id = btn.getAttribute('data-id'); if(!type||!id) return; if(!confirm('Delete this record?')) return; if(type==='customer') db.customers = db.customers.filter(c=>c.id!==id); else if(type==='product') db.products = db.products.filter(p=>p.id!==id); else if(type==='sale') db.sales = db.sales.filter(s=>s.id!==id); else if(type==='expense') db.expenses = db.expenses.filter(x=>x.id!==id); else if(type==='task') db.tasks = db.tasks.filter(t=>t.id!==id); saveDB(); });
+
+      // export/import/clear
+      const btnExport=document.getElementById('btnExport'); if(btnExport) btnExport.addEventListener('click', ()=>{ const dataStr=JSON.stringify(db,null,2); const blob=new Blob([dataStr],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='qadri_shop_manager_backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+      const btnImport=document.getElementById('btnImport'); if(btnImport) btnImport.addEventListener('click', ()=>{ const input=document.getElementById('importFile'); if(!input||!input.files||!input.files[0]) return alert('Pehle JSON file select karein'); const file=input.files[0]; const reader=new FileReader(); reader.onload=(ev)=>{ try{ const imported=JSON.parse(ev.target.result); if(!imported||typeof imported!=='object') throw new Error('Invalid JSON'); if(!confirm('Import karne se purana data overwrite ho sakta hai. Continue?')) return; db = Object.assign({customers:[],products:[],sales:[],expenses:[],tasks:[]}, imported); saveDB(); alert('Import complete'); }catch(err){ alert('File sahi JSON backup nahi hai'); } }; reader.readAsText(file); });
+      const btnClearAll=document.getElementById('btnClearAll'); if(btnClearAll) btnClearAll.addEventListener('click', ()=>{ if(!confirm('Pura data delete ho jayega. Pakka?')) return; db={customers:[],products:[],sales:[],expenses:[],tasks:[]}; saveDB(); alert('All data cleared'); });
+
+      // login
+      const loginForm=document.getElementById('loginForm'); const loginOverlay=document.getElementById('loginOverlay'); const loginError=document.getElementById('loginError'); const loginPinInput=document.getElementById('loginPin'); if(loginPinInput) loginPinInput.focus(); if(loginForm&&loginOverlay){ loginForm.addEventListener('submit', e=>{ e.preventDefault(); const pinInput = (loginPinInput && loginPinInput.value||'').trim(); if(pinInput===getSavedPin()){ if(loginError) loginError.textContent=''; loginOverlay.style.opacity='0'; setTimeout(()=>{ loginOverlay.style.display='none'; },200); } else { if(loginError) loginError.textContent='Galat PIN. Dobara koshish karein.'; if(loginPinInput) loginPinInput.select(); } }); }
+
+      // update PIN
+      const pinForm=document.getElementById('pinForm'); if(pinForm) pinForm.addEventListener('submit', e=>{ e.preventDefault(); const cur = (document.getElementById('pinCurrent')&&document.getElementById('pinCurrent').value||'').trim(); const next = (document.getElementById('pinNew')&&document.getElementById('pinNew').value||'').trim(); if(cur !== getSavedPin()){ alert('Current PIN galat hai.'); return; } if(!next||next.length<3){ alert('Naya PIN kam az kam 3 digit ka rakhein.'); return; } localStorage.setItem(LOGIN_KEY, next); if(document.getElementById('pinCurrent')) document.getElementById('pinCurrent').value=''; if(document.getElementById('pinNew')) document.getElementById('pinNew').value=''; alert('PIN update ho gaya. Next login me naya PIN lagega.'); });
+
+      setInterval(checkDueTasks, 60*1000); checkDueTasks();
+
+      // 3D login tilt (safe)
+      (function(){ const loginCard=document.getElementById('loginCard'); if(!loginCard) return; const inner=loginCard.querySelector('.card-inner'); if(!inner) return; const intensity=8; loginCard.addEventListener('mousemove', e=>{ const rect=loginCard.getBoundingClientRect(); const x=e.clientX-rect.left; const y=e.clientY-rect.top; const cx=rect.width/2; const cy=rect.height/2; const dx=(x-cx)/cx; const dy=(y-cy)/cy; const rotX=dy*intensity; const rotY=dx*-intensity; inner.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(20px)`; inner.style.boxShadow=`${-rotY*2}px ${rotX*2}px 30px rgba(0,0,0,.45)`; }); loginCard.addEventListener('mouseleave', ()=>{ inner.style.transform='rotateX(0deg) rotateY(0deg) translateZ(0px)'; inner.style.boxShadow=''; }); const pin=document.getElementById('loginPin'); if(pin){ pin.addEventListener('focus', ()=>{ inner.style.transform='translateZ(12px)'; }); pin.addEventListener('blur', ()=>{ inner.style.transform='translateZ(0px)'; }); } })();
+
+      // 3D dashboard interactions
+      (function(){ const scene=document.getElementById('dashboardScene'); const cube=document.getElementById('kpiCube'); const lock=document.getElementById('lockCube'); if(!scene) return; scene.addEventListener('mousemove', e=>{ const r=scene.getBoundingClientRect(); const x=(e.clientX - r.left)/r.width - .5; const y=(e.clientY - r.top)/r.height - .5; const cx = x*18; const cy = y*-18; scene.style.transform = `rotateX(${cy}deg) rotateY(${cx}deg)`; if(cube) cube.style.transform=`rotateX(${cy-10}deg) rotateY(${cx+10}deg)`; if(lock) lock.style.transform=`rotateX(${cy-6}deg) rotateY(${cx+6}deg)`; }); scene.addEventListener('mouseleave', ()=>{ scene.style.transform='rotateX(-6deg) rotateY(6deg)'; if(cube) cube.style.transform='rotateX(-20deg) rotateY(20deg)'; if(lock) lock.style.transform='rotateX(-12deg) rotateY(12deg)'; }); let angle=0; setInterval(()=>{ angle+=.8; if(cube) cube.style.transform=`rotateX(${ -20 + Math.sin(angle/24)*6 }deg) rotateY(${ 20 + angle/6 }deg)`; if(lock) lock.style.transform=`rotateX(${ -12 + Math.cos(angle/30)*4 }deg) rotateY(${ 12 + angle/12 }deg)`; },90);
+        // cube face click handlers
+        Array.from(document.querySelectorAll('#kpiCube .face')).forEach(face=>{ face.style.cursor='pointer'; face.addEventListener('click', ()=>{ const txt=(face.textContent||'').toLowerCase(); if(txt.includes('sales')) document.querySelector('.nav-tab[data-target="sales"]').click(); else if(txt.includes('cust')||txt.includes('customers')) document.querySelector('.nav-tab[data-target="customers"]').click(); else if(txt.includes('stock')) document.querySelector('.nav-tab[data-target="products"]').click(); else if(txt.includes('data')) document.querySelector('.nav-tab[data-target="data"]').click(); else document.querySelector('.nav-tab[data-target="dashboard"]').click(); }); });
+      })();
+
+      // quick actions
+      const quickAddSale=document.getElementById('quickAddSale'); if(quickAddSale) quickAddSale.addEventListener('click', ()=>{ const btn=document.querySelector('.nav-tab[data-target="sales"]'); if(btn) btn.click(); const el=document.getElementById('salePrice'); if(el) el.focus(); });
+      const quickAddData=document.getElementById('quickAddData'); if(quickAddData) quickAddData.addEventListener('click', ()=>{ const btn=document.querySelector('.nav-tab[data-target="data"]'); if(btn) btn.click(); const el=document.getElementById('dataSaleTitle'); if(el) el.focus(); });
+      const quickAddProduct=document.getElementById('quickAddProduct'); if(quickAddProduct) quickAddProduct.addEventListener('click', ()=>{ const btn=document.querySelector('.nav-tab[data-target="products"]'); if(btn) btn.click(); const el=document.getElementById('prodName'); if(el) el.focus(); });
+      const quickExportBtn=document.getElementById('quickExport'); if(quickExportBtn) quickExportBtn.addEventListener('click', ()=>{ const be=document.getElementById('btnExport'); if(be) be.click(); });
+
+      // search
+      const dashSearch=document.getElementById('dashSearch'); if(dashSearch) dashSearch.addEventListener('input', e=>{ const q=(e.target.value||'').toLowerCase().trim(); if(!q) return; const found = db.customers.filter(c=> (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q)); if(found.length){ alert('Found '+found.length+' customer(s). Opening customers tab.'); const btn=document.querySelector('.nav-tab[data-target="customers"]'); if(btn) btn.click(); } });
+
+      // start periodic dashboard UI sync
+      setTimeout(()=>{ refreshDashboard(); update3DCubeFaces(); },400);
+      setInterval(()=>{ refreshDashboard(); update3DCubeFaces(); },1400);
+
+      function update3DCubeFaces(){ const data = window._lastDashboardComputed || {}; function shortNum(v){ if(v===undefined||v===null) return '0'; try{ v=Number(String(v).replace(/[^0-9.-]/g,'')); }catch(e){ return String(v) } if(isNaN(v)) return String(v); if(Math.abs(v)>=10000000) return (v/1000000).toFixed(1)+'M'; if(Math.abs(v)>=10000) return (v/1000).toFixed(1)+'K'; return v.toString(); }
+        try{ setText('cubeFront','Sales\n'+shortNum(data.totalSales||0)); setText('cubeBack','Profit\n'+shortNum((data.totalSales||0)-(data.totalExp||0))); setText('cubeRight','Cust\n'+(data.totalCustomers||0)); setText('cubeLeft','Stock\n'+shortNum(data.stockValue||0)); setText('cubeTop','Data\n'+shortNum(data.dataSalesTotal||0)); setText('cubeBottom','Exp\n'+shortNum(data.totalExp||0)); }catch(e){}
+      }
+
+    }); // DOMContentLoaded end
+  </script>
+  
+    <!-- History section and scripts already present above; additional history functions injected via script -->
+  <script>
+    // --- Add/Render History: centralized Excel-like sheet (CSV export) ---
+    // Ensure db.history exists
+    if (!db.history) db.history = [];
+
+    function addHistory(record){
+      // record: {type, date, title, referenceId, amount, details}
+      const row = Object.assign({id: generateId('hist'), createdAt: Date.now()}, record);
+      db.history.push(row);
+      saveDB();
+      renderHistory();
+      renderTodayHistory();
+    }
+
+    function renderHistory(){
+      const container = document.getElementById('historyTableBody');
+      if(!container) return;
+      container.innerHTML = '';
+      const list = db.history.slice().reverse(); // newest first
+      if(list.length===0){ container.innerHTML = '<tr><td colspan="7" class="small">No history yet</td></tr>'; return; }
+      list.forEach((h,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${list.length - i}</td>
+          <td>${h.date || ''}</td>
+          <td>${h.type || ''}</td>
+          <td>${h.title || ''}</td>
+          <td>${h.referenceId || ''}</td>
+          <td>${h.amount? formatMoney(h.amount): ''}</td>
+          <td class="small">${h.details || ''}</td>
+        `;
+        container.appendChild(tr);
+      });
+      setText('historyCount', db.history.length);
+      renderTodayHistory();
+    }
+
+    function renderTodayHistory(){
+      const el = document.getElementById('todayHistoryList'); if(!el) return;
+      const today = todayISO();
+      const todays = (db.history||[]).filter(h=> (h.date||'') === today).slice().reverse();
+      if(!todays.length){ el.innerHTML = '<div class="small">No history for today</div>'; return; }
+      // create a short list (max 6 items)
+      const items = todays.slice(0,6).map((h,idx)=>{
+        const amt = h.amount? (' — ' + formatMoney(h.amount)) : '';
+        return `<div style="margin-bottom:.35rem;"><strong>${h.type}</strong>: ${h.title || ''}${amt} <div class="small">${h.details||''}</div></div>`;
+      }).join('');
+      el.innerHTML = items;
+    }
+
+    function exportHistoryCSV(){
+      if(!db.history || db.history.length===0){ alert('History empty'); return; }
+      const cols = ['No','Date','Type','Title','ReferenceId','Amount','Details'];
+      const rows = db.history.slice().map((h,idx)=>[
+        idx+1,
+        (h.date||''),
+        (h.type||''),
+        `"${(h.title||'').replace(/"/g,'""') }"`,
+        (h.referenceId||''),
+        (h.amount||''),
+        `"${(h.details||'').replace(/"/g,'""') }"`
+      ]);
+      const csv = [cols.join(','), ...rows.map(r=>r.join(','))].join('\n');
+      const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'qadri_history.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function clearHistory(){ if(!confirm('Are you sure you want to clear history?')) return; db.history = []; saveDB(); renderHistory(); }
+
+    // --- Hook all create actions to add history entries ---
+    // We will wrap existing save points by adding calls to addHistory in appropriate places.
+    // For safety, we add event listeners on custom events so we don't alter the original functions directly.
+
+    // Emit custom events on actions
+    function emitHistoryEvent(detail){
+      try{ window.dispatchEvent(new CustomEvent('qadri:history', {detail})); }catch(e){}
+    }
+
+    // Listen and add
+    window.addEventListener('qadri:history', (ev)=>{ addHistory(ev.detail); });
+
+    // Patch points: after saveDB is called many times; to avoid changing many places, we attach to saveDB to also process a queue
+    // We'll expose a small queue helper to push entries before saveDB() and flush on saveDB
+    window._qHistoryPending = window._qHistoryPending || [];
+    function queueHistory(entry){ window._qHistoryPending.push(entry); }
+
+    // Wrap original saveDB to flush queue (we replace the function safely)
+    (function(){
+      const originalSave = saveDB;
+      saveDB = function(){
+        // flush pending
+        while(window._qHistoryPending && window._qHistoryPending.length){ const e = window._qHistoryPending.shift(); if(e) addHistory(e); }
+        originalSave();
+      }
+    })();
+
+    // Now: add queueHistory calls at points where data is created
+    // We add event listeners to forms submit events (they already call saveDB), so we queue before they save.
+    (function(){
+      const custForm = document.getElementById('customerForm'); if(custForm) custForm.addEventListener('submit', ()=>{
+        const name = (document.getElementById('custName')&&document.getElementById('custName').value)||'';
+        queueHistory({type:'Customer', date: todayISO(), title: name, referenceId:'', amount:0, details:'New customer added'});
+      });
+
+      const prodForm = document.getElementById('productForm'); if(prodForm) prodForm.addEventListener('submit', ()=>{
+        const name = (document.getElementById('prodName')&&document.getElementById('prodName').value)||'';
+        const qty = Number(document.getElementById('prodQty')&&document.getElementById('prodQty').value)||0;
+        queueHistory({type:'Product', date: todayISO(), title: name, referenceId:'', amount:0, details:`Qty: ${qty}`});
+      });
+
+      const saleForm = document.getElementById('saleForm'); if(saleForm) saleForm.addEventListener('submit', ()=>{
+        const title = (document.getElementById('saleProduct')? document.getElementById('saleProduct').selectedOptions[0].text : '') || document.getElementById('saleNotes')?.value || 'Sale';
+        const price = Number(document.getElementById('salePrice')&&document.getElementById('salePrice').value)||0;
+        const qty = Number(document.getElementById('saleQty')&&document.getElementById('saleQty').value)||1;
+        queueHistory({type:'Sale', date: todayISO(), title: title, referenceId:'', amount: price*qty, details:`Qty: ${qty}`});
+      });
+
+      const dataSaleFormEl = document.getElementById('dataSaleForm'); if(dataSaleFormEl) dataSaleFormEl.addEventListener('submit', ()=>{
+        const title = (document.getElementById('dataSaleTitle')&&document.getElementById('dataSaleTitle').value)||'Data Sale';
+        const amount = Number(document.getElementById('dataSaleAmount')&&document.getElementById('dataSaleAmount').value)||0;
+        queueHistory({type:'DataSale', date: todayISO(), title, referenceId:'', amount, details:document.getElementById('dataSaleNotes')?.value||''});
+      });
+
+      const expenseFormEl = document.getElementById('expenseForm'); if(expenseFormEl) expenseFormEl.addEventListener('submit', ()=>{
+        const cat = (document.getElementById('expCategory')&&document.getElementById('expCategory').value)||'Expense';
+        const amount = Number(document.getElementById('expAmount')&&document.getElementById('expAmount').value)||0;
+        queueHistory({type:'Expense', date: todayISO(), title: cat, referenceId:'', amount, details:document.getElementById('expNotes')?.value||''});
+      });
+
+      const taskFormEl = document.getElementById('taskForm'); if(taskFormEl) taskFormEl.addEventListener('submit', ()=>{
+        const title = (document.getElementById('taskTitle')&&document.getElementById('taskTitle').value)||'Task';
+        queueHistory({type:'Task', date: todayISO(), title, referenceId:'', amount:0, details:document.getElementById('taskNotes')?.value||''});
+      });
+    })();
+
+    // --- Inject History tab into DOM (simple insertion) ---
+    (function(){
+      // add nav button
+      const nav = document.querySelector('.nav-tabs');
+      if(nav && !document.querySelector('.nav-tab[data-target="history"]')){
+        const b = document.createElement('button'); b.className='nav-tab'; b.setAttribute('data-target','history'); b.innerHTML='<span class="icon">📜</span>History'; nav.appendChild(b);
+        b.addEventListener('click', ()=>{ document.querySelectorAll('.nav-tab').forEach(nb=>nb.classList.remove('active')); b.classList.add('active'); document.querySelectorAll('main section').forEach(sec=>sec.classList.toggle('active', sec.id==='history')); });
+      }
+
+      // add section HTML at end of main if not present
+      if(!document.getElementById('history')){
+        const main = document.querySelector('main');
+        const sec = document.createElement('section'); sec.id='history';
+        sec.innerHTML = `
+          <div class="flex-between"><h2><span class="icon">📜</span>History</h2><span class="badge"><span>🗂</span><span id="historyCount">0</span></span></div>
+          <div style="margin:.6rem 0;display:flex;gap:.5rem;align-items:center;">
+            <button id="btnExportHistory" class="btn-outline">⬇️ Export CSV</button>
+            <button id="btnClearHistory" class="btn-danger">Clear History</button>
+            <input id="historyFilter" placeholder="Filter by type or title" style="margin-left:auto;padding:.4rem .6rem;border-radius:.5rem;" />
+          </div>
+          <div class="table-wrapper"><table><thead><tr><th>#</th><th>Date</th><th>Type</th><th>Title</th><th>Ref</th><th>Amount</th><th>Details</th></tr></thead><tbody id="historyTableBody"></tbody></table></div>
+        `;
+        main.appendChild(sec);
+
+        // attach buttons
+        document.getElementById('btnExportHistory').addEventListener('click', exportHistoryCSV);
+        document.getElementById('btnClearHistory').addEventListener('click', clearHistory);
+        document.getElementById('historyFilter').addEventListener('input', (e)=>{
+          const q = (e.target.value||'').toLowerCase().trim(); const body = document.getElementById('historyTableBody'); if(!body) return; const rows = body.querySelectorAll('tr'); rows.forEach(r=>{ const txt = r.textContent.toLowerCase(); r.style.display = q? (txt.includes(q)? 'table-row' : 'none') : ''; });
+        });
+      }
+
+      // initial render
+      renderHistory();
+    })();
+
+    // Also render after DOMContentLoaded save operations
+    window.addEventListener('load', ()=>{ renderHistory(); });
+
+  </script>
+</body>
+</html>
